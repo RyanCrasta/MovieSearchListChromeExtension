@@ -1,0 +1,32 @@
+{
+    "manifest_version": 3,
+    "name": "Movie Search List",
+    "description": "Movie Search List for chrome extension",
+    "version": "1.0.0",
+    "action" : {
+        "default_popup": "popup.html",
+        "default_title": "Movie Search List",
+        "default_icon" : "movieIcon.png"
+    },
+    "permissions": [
+        "tabs",
+        "bookmarks",
+        "storage",
+        "identity"
+    ],
+    "icons": {
+        "16" : "movieIcon.png",
+        "48" : "movieIcon.png",
+        "128" : "movieIcon.png"
+    },
+    "options_page": "options.html",
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["contentScript.js"]
+        }
+    ]
+}

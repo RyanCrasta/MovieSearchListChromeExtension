@@ -6,6 +6,14 @@ import { addMovie } from "./actions";
 const store = createStore(reducer);
 let tabUpdated = false;
 
+interface result {
+  title: string,
+  release_date: string,
+  overview: string,
+  vote_average: number,
+  id: number,
+}
+
 const options = {
   method: "GET",
   headers: {
@@ -17,21 +25,20 @@ const options = {
 
 const url = "https://api.themoviedb.org/3/search/movie?query=";
 
-function searchUpdated(requestDetails, changeInfo, tab) {
+function searchUpdated(requestDetails:number, changeInfo: {status: string}, tab: {status?: string, url?: string, title?: string}) {
   if (
     tab.status === "complete" &&
     tab.url !== undefined &&
     tab.url !== "chrome://newtab/"
   ) {
     chrome.storage.local.get("urls", function (URL) {
-      // Iterate through this list here and match with tab.url, if the match is found, just return.
       if (
         Object.keys(URL).length === 0 &&
         URL.constructor === Object &&
         !tabUpdated
       ) {
         tabUpdated = true;
-        const newArr = [tab.title];
+        const newMovieSearch = [tab.title];
 
         const newURL = `${url}${
           tab.title.split(" - ")[0]
@@ -43,7 +50,7 @@ function searchUpdated(requestDetails, changeInfo, tab) {
           })
           .then((json) => {
             if (json.results.length > 0) {
-              json.results.map((result) => {
+              json.results.map((result: result) => {
                 store.dispatch(
                   addMovie({
                     movieName: result.title,
@@ -56,7 +63,7 @@ function searchUpdated(requestDetails, changeInfo, tab) {
 
                 chrome.storage.local
                   .set({
-                    urls: newArr,
+                    urls: newMovieSearch,
                   })
                   .then(() => {
                     tabUpdated = true;
@@ -65,7 +72,7 @@ function searchUpdated(requestDetails, changeInfo, tab) {
             } else {
               chrome.storage.local
                 .set({
-                  urls: newArr,
+                  urls: newMovieSearch,
                 })
                 .then(() => {
                   tabUpdated = true;
@@ -91,7 +98,7 @@ function searchUpdated(requestDetails, changeInfo, tab) {
             })
             .then((json) => {
               if (json.results.length > 0) {
-                json.results.map((result) => {
+                json.results.map((result: result) => {
                   store.dispatch(
                     addMovie({
                       movieName: result.title,
@@ -126,6 +133,7 @@ function searchUpdated(requestDetails, changeInfo, tab) {
   }
 }
 
+// whenever new search made this would be triggered
 chrome.tabs.onUpdated.addListener(searchUpdated);
 
 export default createBackgroundStore({

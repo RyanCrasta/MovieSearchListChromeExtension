@@ -30,6 +30,7 @@
   "dependencies": {
     "autoprefixer": "^10.4.7",
     "postcss": "^8.4.14",
+    "process": "^0.11.10",
     "react-router-dom": "6.2",
     "redux": "3.6",
     "redux-webext": "^1.1.2",

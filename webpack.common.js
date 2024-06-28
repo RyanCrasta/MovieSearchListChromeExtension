@@ -4,14 +4,22 @@ const HtmlPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const tailwindcss = require("tailwindcss");
 const autoprefixer = require("autoprefixer");
+const PAGES_PATH = "./src/pages";
+
+function generateHtmlPlugins(items) {
+    return items.map(
+      (name) =>
+        new HtmlPlugin({
+          filename: `./${name}.html`,
+          chunks: [name],
+        })
+    );
+}
 
 module.exports = {
   entry: {
-    popup: path.resolve("src/popup/index.tsx"),
-    options: path.resolve("src/options/index.tsx"),
-    background: path.resolve("src/background/background.ts"),
-    contentScript: path.resolve("src/contentScript/contentScript.ts"),
-    newTab: path.resolve("src/tabs/index.tsx"),
+    popup: `${PAGES_PATH}/popup`,
+    background:  `${PAGES_PATH}/background`,
   },
   module: {
     rules: [
@@ -54,19 +62,19 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         {
-          from: path.resolve("src/static"),
+          from: path.resolve("src/"),
           to: path.resolve("dist"),
         },
       ],
     }),
-    ...getHtmlPlugins(["popup", "options", "newTab"]),
+    ...generateHtmlPlugins(["background", "popup"]),
   ],
   resolve: {
     extensions: [".tsx", ".js", ".ts"],
   },
   output: {
+    path: path.resolve("dist/"),
     filename: "[name].js",
-    path: path.join(__dirname, "dist"),
   },
   optimization: {
     splitChunks: {
@@ -74,14 +82,3 @@ module.exports = {
     },
   },
 };
-
-function getHtmlPlugins(chunks) {
-  return chunks.map(
-    (chunk) =>
-      new HtmlPlugin({
-        title: "React Extension",
-        filename: `${chunk}.html`,
-        chunks: [chunk],
-      })
-  );
-}

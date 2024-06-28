@@ -1,21 +1,19 @@
 import React from "react";
-import { createRoot } from "react-dom/client";
-import "../assets/tailwind.css";
-import Popup from "./popup";
+import Popup from "./app";
 import { Provider } from "react-redux";
 import { createUIStore } from "redux-webext";
+import ReactDOM from "react-dom";
 
 async function init() {
   const store = await createUIStore();
   const mountNode = document.createElement("div");
   document.body.appendChild(mountNode);
 
-  const root = createRoot(mountNode);
-
-  root.render(
+  ReactDOM.render(
     <Provider store={store}>
       <Popup />
-    </Provider>
+    </Provider>,
+    mountNode
   );
 }
 

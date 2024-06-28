@@ -1,17 +1,14 @@
-import { createStore } from "redux";
-import { createBackgroundStore } from "redux-webext";
-import reducer from "./reducers";
 import { addMovie } from "./actions";
+import store from "./store";
 
-const store = createStore(reducer);
 let tabUpdated = false;
 
 interface result {
-  title: string,
-  release_date: string,
-  overview: string,
-  vote_average: number,
-  id: number,
+  title: string;
+  release_date: string;
+  overview: string;
+  vote_average: number;
+  id: number;
 }
 
 const options = {
@@ -25,12 +22,17 @@ const options = {
 
 const url = "https://api.themoviedb.org/3/search/movie?query=";
 
-function searchUpdated(requestDetails:number, changeInfo: {status: string}, tab: {status?: string, url?: string, title?: string}) {
+function searchUpdated(
+  requestDetails: number,
+  changeInfo: { status: string },
+  tab: { status?: string; url?: string; title?: string }
+) {
   if (
     tab.status === "complete" &&
     tab.url !== undefined &&
     tab.url !== "chrome://newtab/"
   ) {
+    // check if same search already saved then no need to search again
     chrome.storage.local.get("urls", function (URL) {
       if (
         Object.keys(URL).length === 0 &&
@@ -60,24 +62,12 @@ function searchUpdated(requestDetails:number, changeInfo: {status: string}, tab:
                     id: result.id,
                   })
                 );
-
-                chrome.storage.local
-                  .set({
-                    urls: newMovieSearch,
-                  })
-                  .then(() => {
-                    tabUpdated = true;
-                  });
               });
-            } else {
-              chrome.storage.local
-                .set({
-                  urls: newMovieSearch,
-                })
-                .then(() => {
-                  tabUpdated = true;
-                });
             }
+            chrome.storage.local.set({
+              urls: newMovieSearch,
+            });
+            tabUpdated = true;
           });
       } else {
         if (
@@ -108,24 +98,12 @@ function searchUpdated(requestDetails:number, changeInfo: {status: string}, tab:
                       id: result.id,
                     })
                   );
-
-                  chrome.storage.local
-                    .set({
-                      urls: URL.urls,
-                    })
-                    .then(() => {
-                      tabUpdated = true;
-                    });
                 });
-              } else {
-                chrome.storage.local
-                  .set({
-                    urls: URL.urls,
-                  })
-                  .then(() => {
-                    tabUpdated = true;
-                  });
               }
+              tabUpdated = true;
+              chrome.storage.local.set({
+                urls: URL.urls,
+              });
             });
         }
       }
@@ -135,10 +113,3 @@ function searchUpdated(requestDetails:number, changeInfo: {status: string}, tab:
 
 // whenever new search made this would be triggered
 chrome.tabs.onUpdated.addListener(searchUpdated);
-
-export default createBackgroundStore({
-  store,
-  actions: {
-    MOVIE_ADD: addMovie,
-  },
-});
